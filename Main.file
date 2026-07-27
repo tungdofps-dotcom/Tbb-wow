@@ -1,3 +1,4 @@
+ -- [[ THE BATTLE BRICKS: MULTI-FARM V51 (FULL SCRIPT) ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local VIM = game:GetService("VirtualInputManager")
@@ -9,26 +10,26 @@ if CoreGui:FindFirstChild("BattleBricksCustomUI") then
     CoreGui.BattleBricksCustomUI:Destroy()
 end
 
--- [[ TẠO GIAO DIỆN SCREEN GUI CHÍNH ]]
+-- 1. TẠO GIAO DIỆN SCREEN GUI CHÍNH
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "BattleBricksCustomUI"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- 1. NÚT LOGO NỔI TRÊN MÀN HÌNH (BẤM ĐỂ MỞ/ĐÓNG MENU)
+-- Nút Logo nổi trên màn hình để mở/đóng menu
 local ToggleButton = Instance.new("ImageButton")
 ToggleButton.Name = "LogoButton"
 ToggleButton.Size = UDim2.new(0, 50, 0, 50)
 ToggleButton.Position = UDim2.new(0, 20, 0, 150)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-ToggleButton.Image = "rbxassetid://6023426915" -- Icon bánh răng / logo
+ToggleButton.Image = "rbxassetid://6023426915"
 ToggleButton.Parent = ScreenGui
 
 local UICornerLogo = Instance.new("UICorner")
 UICornerLogo.CornerRadius = UDim.new(1, 0)
 UICornerLogo.Parent = ToggleButton
 
--- 2. KHUNG MENU CHÍNH HÌNH CHỮ NHẬT (MÀU XANH)
+-- Khung Menu chính hình chữ nhật (Màu xanh chủ đạo)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 480, 0, 300)
@@ -57,7 +58,7 @@ local UICornerTitle = Instance.new("UICorner")
 UICornerTitle.CornerRadius = UDim.new(0, 8)
 TitleLabel.Parent = MainFrame
 
--- 3. HỆ THỐNG SIDEBAR BÊN TRÁI (CHUYỂN ĐỔI TAB MÀU XANH)
+-- 2. HỆ THỐNG SIDEBAR BÊN TRÁI (CHUYỂN ĐỔI TAB)
 local Sidebar = Instance.new("Frame")
 Sidebar.Size = UDim2.new(0, 130, 1, -40)
 Sidebar.Position = UDim2.new(0, 0, 0, 40)
@@ -65,11 +66,6 @@ Sidebar.BackgroundColor3 = Color3.fromRGB(20, 28, 45)
 Sidebar.BorderSizePixel = 0
 Sidebar.Parent = MainFrame
 
-local Container = Instance.new("Folder")
-Container.Name = "TabContainers"
-Container.Parent = MainFrame
-
--- Hàm tạo các Tab Nội Dung
 local function CreateTabPage()
     local page = Instance.new("ScrollingFrame")
     page.Size = UDim2.new(1, -140, 1, -50)
@@ -85,10 +81,9 @@ end
 local Tab1 = CreateTabPage()
 local Tab2 = CreateTabPage()
 local Tab3 = CreateTabPage()
-Tab1.Visible = true -- Mặc định mở tab 1
+Tab1.Visible = true
 
--- Tạo các nút Sidebar
-local function CreateSidebarButton(name, posY, targetTab)
+local function CreateSidebarButton(name, posY, targetTab, btnList)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -10, 0, 35)
     btn.Position = UDim2.new(0, 5, 0, posY)
@@ -108,13 +103,29 @@ local function CreateSidebarButton(name, posY, targetTab)
         Tab2.Visible = false
         Tab3.Visible = false
         targetTab.Visible = true
+        
+        -- Reset màu các nút sidebar về tối, nút đang chọn đổi sang xanh sáng
+        for _, otherBtn in ipairs(btnList) do
+            otherBtn.BackgroundColor3 = Color3.fromRGB(30, 40, 60)
+            otherBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        end
+        btn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end)
     return btn
 end
 
-CreateSidebarButton("Main Farm", 10, Tab1)
-CreateSidebarButton("Animations", 55, Tab2)
-CreateSidebarButton("Settings", 100, Tab3)
+local buttons = {}
+local b1 = CreateSidebarButton("Main Farm", 10, Tab1, buttons)
+local b2 = CreateSidebarButton("Animations", 55, Tab2, buttons)
+local b3 = CreateSidebarButton("Settings", 100, Tab3, buttons)
+table.insert(buttons, b1)
+table.insert(buttons, b2)
+table.insert(buttons, b3)
+
+-- Mặc định nút đầu tiên sáng màu xanh
+b1.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+b1.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 -- Sự kiện bật/tắt Menu bằng nút Logo
 local isOpen = false
@@ -132,7 +143,7 @@ _G.AutoRespawn = false
 local Offset_X = 30  
 local OriginalPositions = {}
 
--- Hàm tạo Toggle Button tiêu chuẩn trong Tab
+-- Hàm tạo Toggle Button trong Tab
 local function CreateToggleUI(parent, name, callback, posY)
     local toggleBtn = Instance.new("TextButton")
     toggleBtn.Size = UDim2.new(1, -20, 0, 35)
@@ -152,7 +163,7 @@ local function CreateToggleUI(parent, name, callback, posY)
     toggleBtn.MouseButton1Click:Connect(function()
         state = not state
         if state then
-            toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255) -- Đổi sang màu xanh sáng khi bật
+            toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
             toggleBtn.Text = name .. ": [ON]"
         else
             toggleBtn.BackgroundColor3 = Color3.fromRGB(35, 48, 75)
@@ -162,7 +173,7 @@ local function CreateToggleUI(parent, name, callback, posY)
     end)
 end
 
--- Đưa các tính năng vào Tab tương ứng
+-- Thêm các chức năng vào Tab
 CreateToggleUI(Tab1, "Bring Enemies", function(v) _G.BringFarm = v end, 10)
 CreateToggleUI(Tab1, "Teleport to Enemies", function(v) _G.TeleportFarm = v end, 55)
 CreateToggleUI(Tab1, "Auto Skill (Right Click)", function(v) _G.AutoSkillV51 = v end, 100)
@@ -171,8 +182,7 @@ CreateToggleUI(Tab2, "Retro Animation V51", function(v) _G.RetroAnimV51 = v end,
 
 CreateToggleUI(Tab3, "Auto Respawn / Bypass", function(v) _G.AutoRespawn = v end, 10)
 
-
--- [[ CÁC HÀM XỬ LÝ LÕI LOGIC (GIỮ NGUYÊN BẢN CHUẨN V51) ]]
+-- 3. CÁC HÀM XỬ LÝ LOGIC CHÍNH
 local function hasRedColor(model)
     for _, child in pairs(model:GetDescendants()) do
         if child:IsA("BrickColorValue") or child:IsA("Color3Value") then
@@ -203,36 +213,46 @@ local function processAndCheckTarget(model)
     return humanoid and humanoid.Health > 0
 end
 
--- Hồi sinh tự động
+-- Hệ thống tự động hồi sinh qua CoreGui
 task.spawn(function()
     while true do
-        task.wait(0.5)
+        task.wait(0.4)
         if _G.AutoRespawn then
-            local char = LP.Character
-            local hum = char and char:FindFirstChildOfClass("Humanoid")
-            if not char or (hum and hum.Health <= 0) or not char:FindFirstChild("HumanoidRootPart") then
-                pcall(function()
-                    if LP:FindFirstChild("CharacterAppearanceId") then LP:LoadCharacter() end
-                    local InGameMenu = LP.PlayerGui:FindFirstChild("InGameMenu") or CoreGui:FindFirstChild("InGameMenu")
-                    if InGameMenu then
-                        local container = InGameMenu:FindFirstChild("RespawnDialogContainer", true)
-                        if container and container.Visible then
-                            for _, v in pairs(container:GetDescendants()) do
-                                if v:IsA("TextButton") and (v.Text:lower():find("có") or v.Text:lower():find("yes")) then
-                                    firesignal(v.MouseButton1Click)
+            pcall(function()
+                local char = LP.Character
+                local hum = char and char:FindFirstChildOfClass("Humanoid")
+                
+                if not char or (hum and hum.Health <= 0) or not char:FindFirstChild("HumanoidRootPart") then
+                    local robloxGui = CoreGui:FindFirstChild("RobloxGui")
+                    local inGameMenu = robloxGui and robloxGui:FindFirstChild("InGameMenu", true)
+                    
+                    if inGameMenu then
+                        local container = inGameMenu:FindFirstChild("RespawnDialogContainer", true)
+                        if container then
+                            for _, btn in pairs(container:GetDescendants()) do
+                                if btn:IsA("TextButton") then
+                                    local txt = btn.Text:lower()
+                                    if txt:find("có") or txt:find("yes") or txt:find("respawn") or txt:find("xuất hiện") then
+                                        firesignal(btn.MouseButton1Click)
+                                    end
                                 end
                             end
                         end
                     end
-                end)
-                pcall(function() LP.CharacterAdded:Wait() end)
-                task.wait(1)
-            end
+                    
+                    if LP:FindFirstChild("CharacterAppearanceId") then
+                        LP:LoadCharacter()
+                    end
+                    
+                    LP.CharacterAdded:Wait()
+                    task.wait(0.5)
+                end
+            end)
         end
     end
 end)
 
--- Vòng lặp Farm chính
+-- Vòng lặp xử lý Farm (Bring / Teleport)
 RunService.Heartbeat:Connect(function()
     local MyCharacter = LP.Character
     local MyRoot = MyCharacter and MyCharacter:FindFirstChild("HumanoidRootPart")
@@ -264,7 +284,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Đánh và spam skill
+-- Vòng lặp đánh quái và kích hoạt skill
 task.spawn(function()
     while true do
         task.wait(0.05)
